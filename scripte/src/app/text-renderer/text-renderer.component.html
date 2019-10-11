@@ -1,3 +1,5 @@
 <div>
-    <p>{{text}}</p>
+    <p>
+        <span class="char" *ngFor="let char of text; let i=index"><span class="cursor" *ngIf="i == cursorPosition">|</span>{{ char }}</span>
+    </p>
 </div>

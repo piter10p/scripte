@@ -11,11 +11,16 @@ export class TextRendererComponent implements OnInit {
   constructor(private documentBodyService: DocumentBodyService) {
   }
 
-  private text: string;
+  private text: string[];
+  private cursorPosition: number = 0;
 
   ngOnInit() {
-    this.documentBodyService.documentBodyChanged$.subscribe((value: string) => {
+    this.documentBodyService.documentBodyChanged$.subscribe((value: string[]) => {
       this.text = value;
+    });
+
+    this.documentBodyService.cursorPositionChanged$.subscribe((value: number) => {
+      this.cursorPosition = value;
     });
   }
 }

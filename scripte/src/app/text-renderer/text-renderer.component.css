@@ -1,0 +1,16 @@
+.char {
+    position: relative;
+}
+
+.cursor {
+    position: absolute;
+    left: -1pt;
+    font-weight: bold;
+    animation: blinker 2s normal infinite;
+}
+
+@keyframes blinker {
+    50% {
+      opacity: 0;
+    }
+  }
