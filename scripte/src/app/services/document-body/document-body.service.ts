@@ -38,9 +38,12 @@ export class DocumentBodyService {
   }
 
   private backspaceLogic(event: KeyboardEvent) {
-    if (this.keyIsBackspace(event.key)) {
-      this.documentBody = this.documentBody.slice(null, this.documentBody.length - 1);
+    if (this.keyIsBackspace(event.key) && this.cursorPosition > 0) {
+      this.documentBody.splice(this.cursorPosition - 1, 1);
+      this.cursorPosition--;
+
       this.updateDocumentBody();
+      this.updateCursorPosition();
     }
   }
 
