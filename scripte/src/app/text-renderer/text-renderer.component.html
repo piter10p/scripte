@@ -1,5 +1,6 @@
 <div>
     <p>
         <span class="char" *ngFor="let char of text; let i=index"><span class="cursor" *ngIf="i == cursorPosition">|</span>{{ char }}</span>
+        <span class="char" *ngIf="text.length == cursorPosition"><span class="cursor">|</span></span>
     </p>
 </div>
