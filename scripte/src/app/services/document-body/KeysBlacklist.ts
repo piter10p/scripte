@@ -6,6 +6,7 @@ export class KeysBlacklist {
         'Control',
         'AltGraph',
         'Backspace',
+        'Enter',
         'Meta',
         'Escape',
         'Tab',

@@ -1,5 +1,6 @@
 .char {
     position: relative;
+    white-space: pre;
 }
 
 .cursor {
