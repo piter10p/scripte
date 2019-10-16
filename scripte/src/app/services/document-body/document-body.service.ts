@@ -1,6 +1,10 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { KeysBlacklist } from './KeysBlacklist';
+import { KeyEventConsumerContext } from './KeyEventConsumers/KeyEventConsumerContext';
+import { WritableKeyEventConsumer } from './KeyEventConsumers/WritableKeyEventConsumer';
+import { BackspaceKeyEventConsumer } from './KeyEventConsumers/BackspaceKeyEventConsumer';
+import { CursorMoveKeyEventConsumer } from './KeyEventConsumers/CursorMoveKeyEventConsumer';
+import { IKeyEventConsumer } from './KeyEventConsumers/IKeyEventConsumer';
 
 @Injectable({
   providedIn: 'root'
@@ -12,6 +16,12 @@ export class DocumentBodyService {
       this.onKeydownHandler(event));
   }
 
+  private keyEventConsumers: IKeyEventConsumer[] = [
+    new WritableKeyEventConsumer(),
+    new BackspaceKeyEventConsumer(),
+    new CursorMoveKeyEventConsumer()
+  ];
+
   private documentBody: string[] = ['t', 'e', 's', 't'];
   private documentBodyChanged = new BehaviorSubject(this.documentBody);
 
@@ -22,68 +32,27 @@ export class DocumentBodyService {
   public cursorPositionChanged$ = this.cursorPositionChanged.asObservable();
 
   private onKeydownHandler(event: KeyboardEvent) {
-    this.writableLogic(event);
-    this.backspaceLogic(event);
-    this.arrowsLogic(event);
-  }
 
-  private writableLogic(event: KeyboardEvent) {
-    if (this.keyIsWritable(event.key)) {
-      this.documentBody.splice(this.cursorPosition, 0, event.key);
-      this.cursorPosition++;
+    const context = this.createKeyEventConsumerContext(event);
 
-      this.updateDocumentBody();
-      this.updateCursorPosition();
-    }
-  }
-
-  private backspaceLogic(event: KeyboardEvent) {
-    if (this.keyIsBackspace(event.key) && this.cursorPosition > 0) {
-      this.documentBody.splice(this.cursorPosition - 1, 1);
-      this.cursorPosition--;
-
-      this.updateDocumentBody();
-      this.updateCursorPosition();
-    }
-  }
-
-  private arrowsLogic(event: KeyboardEvent) {
-    const key = event.key;
-
-    if (key === 'ArrowLeft' && this.cursorPosition > 0) {
-      this.cursorPosition--;
-      this.updateCursorPosition();
-    } else if (key === 'ArrowRight' && this.cursorPosition < this.documentBody.length) {
-      this.cursorPosition++;
-      this.updateCursorPosition();
-    }
-  }
-
-  private keyIsWritable(key: string): boolean {
-    let writable = true;
-
-    KeysBlacklist.BlacklistedKeys.forEach(k => {
-      if (key === k) {
-        writable = false;
-        return;
-      }
+    this.keyEventConsumers.forEach(consumer => {
+      consumer.handle(context);
     });
-
-    return writable;
   }
 
-  private keyIsBackspace(key: string): boolean {
-    if (key === 'Backspace') {
-      return true;
-    }
-    return false;
-  }
+  private createKeyEventConsumerContext(event: KeyboardEvent): KeyEventConsumerContext {
+    const context = new KeyEventConsumerContext();
+    context.event = event;
+    context.documentBody = this.documentBody;
+    context.cursorPosition = this.cursorPosition;
+    context.documentBodyUpdateCallback = (c: KeyEventConsumerContext) => {
+      this.documentBody = c.documentBody;
+      this.cursorPosition = c.cursorPosition;
 
-  private updateDocumentBody() {
-    this.documentBodyChanged.next(this.documentBody);
-  }
+      this.documentBodyChanged.next(this.documentBody);
+      this.cursorPositionChanged.next(this.cursorPosition);
+    };
 
-  private updateCursorPosition() {
-    this.cursorPositionChanged.next(this.cursorPosition);
+    return context;
   }
 }
