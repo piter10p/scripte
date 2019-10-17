@@ -10,6 +10,11 @@
     animation: blinker 2s normal infinite;
 }
 
+.highlight {
+  background-color: black;
+  color: white;
+}
+
 @keyframes blinker {
     50% {
       opacity: 0;

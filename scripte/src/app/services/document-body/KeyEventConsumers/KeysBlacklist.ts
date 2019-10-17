@@ -43,5 +43,18 @@ export class KeysBlacklist {
         'ArrowDown',
         'ArrowLeft',
         'ArrowRight'
-      ]
+      ];
+
+    public static isKeyWritable(key: string): boolean {
+      let writable = true;
+
+      KeysBlacklist.BlacklistedKeys.forEach(k => {
+          if (key === k) {
+          writable = false;
+          return;
+          }
+      });
+
+      return writable;
+    }
 }

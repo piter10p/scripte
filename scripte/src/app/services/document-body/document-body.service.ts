@@ -1,16 +1,22 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { KeysBlacklist } from './KeysBlacklist';
+import { KeyEventConsumerContext } from './KeyEventConsumers/KeyEventConsumerContext';
+import { KeyEventConsumerRegistryService } from './KeyEventConsumers/key-event-consumer-registry.service';
+import { TextSelection } from './TextSelection';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DocumentBodyService {
 
-  constructor() {
+  constructor(keyEventConsumerRegistry: KeyEventConsumerRegistryService) {
     window.addEventListener('keydown', (event) =>
       this.onKeydownHandler(event));
+
+    this.keyEventConsumerRegistry = keyEventConsumerRegistry;
   }
+
+  private keyEventConsumerRegistry: KeyEventConsumerRegistryService;
 
   private documentBody: string[] = ['t', 'e', 's', 't'];
   private documentBodyChanged = new BehaviorSubject(this.documentBody);
@@ -18,72 +24,37 @@ export class DocumentBodyService {
   private cursorPosition: number = 0;
   private cursorPositionChanged = new BehaviorSubject(this.cursorPosition);
 
+  private selection: TextSelection;
+  private selectionChanged = new BehaviorSubject(this.selection);
+
   public documentBodyChanged$ = this.documentBodyChanged.asObservable();
   public cursorPositionChanged$ = this.cursorPositionChanged.asObservable();
+  public selectionChanged$ = this.selectionChanged.asObservable();
 
   private onKeydownHandler(event: KeyboardEvent) {
-    this.writableLogic(event);
-    this.backspaceLogic(event);
-    this.arrowsLogic(event);
-  }
-
-  private writableLogic(event: KeyboardEvent) {
-    if (this.keyIsWritable(event.key)) {
-      this.documentBody.splice(this.cursorPosition, 0, event.key);
-      this.cursorPosition++;
-
-      this.updateDocumentBody();
-      this.updateCursorPosition();
-    }
-  }
-
-  private backspaceLogic(event: KeyboardEvent) {
-    if (this.keyIsBackspace(event.key) && this.cursorPosition > 0) {
-      this.documentBody.splice(this.cursorPosition - 1, 1);
-      this.cursorPosition--;
-
-      this.updateDocumentBody();
-      this.updateCursorPosition();
-    }
-  }
-
-  private arrowsLogic(event: KeyboardEvent) {
-    const key = event.key;
-
-    if (key === 'ArrowLeft' && this.cursorPosition > 0) {
-      this.cursorPosition--;
-      this.updateCursorPosition();
-    } else if (key === 'ArrowRight' && this.cursorPosition < this.documentBody.length) {
-      this.cursorPosition++;
-      this.updateCursorPosition();
-    }
-  }
-
-  private keyIsWritable(key: string): boolean {
-    let writable = true;
-
-    KeysBlacklist.BlacklistedKeys.forEach(k => {
-      if (key === k) {
-        writable = false;
-        return;
-      }
+    this.keyEventConsumerRegistry.getKeyEventConsumers()
+    .forEach(consumer => {
+      const context = this.createKeyEventConsumerContext(event);
+      consumer.handle(context);
     });
-
-    return writable;
   }
 
-  private keyIsBackspace(key: string): boolean {
-    if (key === 'Backspace') {
-      return true;
-    }
-    return false;
-  }
+  private createKeyEventConsumerContext(event: KeyboardEvent): KeyEventConsumerContext {
+    const context = new KeyEventConsumerContext();
+    context.event = event;
+    context.documentBody = this.documentBody;
+    context.cursorPosition = this.cursorPosition;
+    context.selection = this.selection;
+    context.documentBodyUpdateCallback = (c: KeyEventConsumerContext) => {
+      this.documentBody = c.documentBody;
+      this.cursorPosition = c.cursorPosition;
+      this.selection = c.selection;
 
-  private updateDocumentBody() {
-    this.documentBodyChanged.next(this.documentBody);
-  }
+      this.documentBodyChanged.next(this.documentBody);
+      this.cursorPositionChanged.next(this.cursorPosition);
+      this.selectionChanged.next(this.selection);
+    };
 
-  private updateCursorPosition() {
-    this.cursorPositionChanged.next(this.cursorPosition);
+    return context;
   }
 }
