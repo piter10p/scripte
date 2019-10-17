@@ -3,6 +3,8 @@ import { BehaviorSubject } from 'rxjs';
 import { KeyEventConsumerContext } from './KeyEventConsumers/KeyEventConsumerContext';
 import { KeyEventConsumerRegistryService } from './KeyEventConsumers/key-event-consumer-registry.service';
 import { TextSelection } from './TextSelection';
+import { DocumentPosition } from './DocumentPosition';
+import { DocumentBody } from './DocumentBody';
 
 @Injectable({
   providedIn: 'root'
@@ -18,10 +20,10 @@ export class DocumentBodyService {
 
   private keyEventConsumerRegistry: KeyEventConsumerRegistryService;
 
-  private documentBody: string[] = ['t', 'e', 's', 't'];
+  private documentBody: DocumentBody = new DocumentBody();
   private documentBodyChanged = new BehaviorSubject(this.documentBody);
 
-  private cursorPosition: number = 0;
+  private cursorPosition: DocumentPosition = new DocumentPosition(0, 0);
   private cursorPositionChanged = new BehaviorSubject(this.cursorPosition);
 
   private selection: TextSelection;
