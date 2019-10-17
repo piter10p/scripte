@@ -2,6 +2,7 @@ import { IKeyEventConsumer } from './IKeyEventConsumer';
 import { KeyEventConsumerContext } from './KeyEventConsumerContext';
 import { TextSelection } from '../TextSelection';
 import { KeysBlacklist } from './KeysBlacklist';
+import { DocumentPosition } from '../DocumentPosition';
 
 export class SelectingKeyEventConsumer implements IKeyEventConsumer {
     handle(context: KeyEventConsumerContext ): void {
@@ -13,19 +14,25 @@ export class SelectingKeyEventConsumer implements IKeyEventConsumer {
         const key = context.event.key;
 
         if (context.event.ctrlKey) {
-            if (key === 'ArrowLeft' && context.cursorPosition > 0) {
+            if (key === 'ArrowLeft' && context.cursorPosition.character > 0) {
                 if (!context.selection) {
-                    context.selection = new TextSelection(context.cursorPosition - 1, context.cursorPosition - 1);
+                    context.selection = new TextSelection(
+                        new DocumentPosition(context.cursorPosition.paragraph, context.cursorPosition.character - 1),
+                        new DocumentPosition(context.cursorPosition.paragraph, context.cursorPosition.character - 1)
+                    );
                 } else {
-                    context.selection.end--;
+                    context.selection.end.character--;
                 }
 
                 context.documentBodyUpdateCallback(context);
-            } else if (key === 'ArrowRight' && context.cursorPosition < context.documentBody.length) {
+            } else if (key === 'ArrowRight' && context.cursorPosition.character < this.getCurrentParagraphLength(context)) {
                 if (!context.selection) {
-                    context.selection = new TextSelection(context.cursorPosition, context.cursorPosition);
+                    context.selection = new TextSelection(
+                        new DocumentPosition(context.cursorPosition.paragraph, context.cursorPosition.character),
+                        new DocumentPosition(context.cursorPosition.paragraph, context.cursorPosition.character)
+                    );
                 } else {
-                    context.selection.end++;
+                    context.selection.end.character++;
                 }
 
                 context.documentBodyUpdateCallback(context);
@@ -44,5 +51,9 @@ export class SelectingKeyEventConsumer implements IKeyEventConsumer {
 
     private isKeyClearingSelection(key: string): boolean {
         return key === 'ArrowLeft' || key === 'ArrowRight' || KeysBlacklist.isKeyWritable(key);
+    }
+
+    private getCurrentParagraphLength(context: KeyEventConsumerContext): number {
+        return context.documentBody.getParagraph(context.cursorPosition).length;
     }
 }

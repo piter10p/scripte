@@ -1,14 +1,17 @@
+import { DocumentPosition } from './DocumentPosition';
+
 export class TextSelection {
 
-    constructor(start: number = 0, end: number = 0) {
+    constructor(start: DocumentPosition, end: DocumentPosition) {
         this.start = start;
         this.end = end;
     }
 
-    public start;
-    public end;
+    public start: DocumentPosition;
+    public end: DocumentPosition;
 
-    public inRange(value: number): boolean {
-        return (value >= this.start && value <= this.end) || (value <= this.start && value >= this.end);
+    public inRange(value: DocumentPosition): boolean {
+        return (value.greaterOrEqual(this.start) && value.smallerOrEqual(this.end)
+            || value.smallerOrEqual(this.start) && value.greaterOrEqual(this.end));
     }
 }
