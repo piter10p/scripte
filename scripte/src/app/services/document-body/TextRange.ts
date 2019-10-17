@@ -1,6 +1,6 @@
 import { DocumentPosition } from './DocumentPosition';
 
-export class TextSelection {
+export class TextRange {
 
     constructor(start: DocumentPosition, end: DocumentPosition) {
         this.start = start;

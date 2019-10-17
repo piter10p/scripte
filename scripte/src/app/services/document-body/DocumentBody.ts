@@ -19,6 +19,10 @@ export class DocumentBody {
         return this.paragraphs[position.paragraph];
     }
 
+    public addParagraph(position: DocumentPosition, paragraph: Paragraph) {
+        this.paragraphs.splice(position.paragraph, 0, paragraph);
+    }
+
     public removeParagraph(position: DocumentPosition) {
         this.paragraphs.splice(position.paragraph, 1);
     }
