@@ -1,6 +1,6 @@
 <div>
-    <p>
-        <span class="char" *ngFor="let char of text; let i=index" [class.highlight]="isCharInSelection(i)"><span class="cursor" *ngIf="i == cursorPosition">|</span>{{ char }}</span>
-        <span class="char" *ngIf="text.length == cursorPosition"><span class="cursor">|</span></span>
+    <p *ngFor="let paragraph of documentBody.paragraphs; let paragraphIndex = index">
+        <span class="char" *ngFor="let char of paragraph.characters; let charIndex = index" [class.highlight]="isCharInSelection(createDocumentPosition(paragraphIndex, charIndex))"><span class="cursor" *ngIf="cursorPosition.equals(createDocumentPosition(paragraphIndex, charIndex))">|</span>{{ char }}</span>
+        <span class="char" *ngIf="cursorPosition.equals(createDocumentPosition(paragraphIndex, documentBody.paragraphs[paragraphIndex].characters.length))"><span class="cursor">|</span></span>
     </p>
 </div>

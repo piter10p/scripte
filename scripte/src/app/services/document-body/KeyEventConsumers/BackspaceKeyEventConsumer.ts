@@ -5,18 +5,23 @@ export class BackspaceKeyEventConsumer implements IKeyEventConsumer {
 
     public handle(context: KeyEventConsumerContext ): void {
 
-        if (this.isBackspace(context.event.key) && context.cursorPosition > 0) {
-            context.documentBody.splice(context.cursorPosition - 1, 1);
-            context.cursorPosition--;
+        if (context.event.key === 'Backspace') {
+            switch (true) {
+                case context.cursorPosition.character > 0:
+                    context.documentBody.getParagraph(context.cursorPosition).removeCharacter(context.cursorPosition.character - 1);
+                    context.cursorPosition.character--;
+                    context.documentBodyUpdateCallback(context);
+                    break;
 
-            context.documentBodyUpdateCallback(context);
-        }
-    }
+                case context.cursorPosition.paragraph > 0:
+                    const text = context.documentBody.getParagraph(context.cursorPosition).text;
+                    context.documentBody.removeParagraph(context.cursorPosition);
 
-    private isBackspace(key: string): boolean {
-        if (key === 'Backspace') {
-          return true;
+                    context.cursorPosition.paragraph--;
+                    const targetParagraph = context.documentBody.getParagraph(context.cursorPosition);
+                    context.cursorPosition.character = targetParagraph.length;
+                    targetParagraph.addCharacterRange(context.cursorPosition.character, text);
+            }
         }
-        return false;
     }
 }
