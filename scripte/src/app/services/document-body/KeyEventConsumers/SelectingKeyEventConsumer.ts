@@ -1,6 +1,6 @@
 import { IKeyEventConsumer } from './IKeyEventConsumer';
 import { KeyEventConsumerContext } from './KeyEventConsumerContext';
-import { TextSelection } from '../TextSelection';
+import { TextRange } from '../TextRange';
 import { KeysBlacklist } from './KeysBlacklist';
 import { DocumentPosition } from '../DocumentPosition';
 
@@ -16,7 +16,7 @@ export class SelectingKeyEventConsumer implements IKeyEventConsumer {
         if (context.event.ctrlKey) {
             if (key === 'ArrowLeft' && context.cursorPosition.character > 0) {
                 if (!context.selection) {
-                    context.selection = new TextSelection(
+                    context.selection = new TextRange(
                         new DocumentPosition(context.cursorPosition.paragraph, context.cursorPosition.character - 1),
                         new DocumentPosition(context.cursorPosition.paragraph, context.cursorPosition.character - 1)
                     );
@@ -27,7 +27,7 @@ export class SelectingKeyEventConsumer implements IKeyEventConsumer {
                 context.documentBodyUpdateCallback(context);
             } else if (key === 'ArrowRight' && context.cursorPosition.character < this.getCurrentParagraphLength(context)) {
                 if (!context.selection) {
-                    context.selection = new TextSelection(
+                    context.selection = new TextRange(
                         new DocumentPosition(context.cursorPosition.paragraph, context.cursorPosition.character),
                         new DocumentPosition(context.cursorPosition.paragraph, context.cursorPosition.character)
                     );

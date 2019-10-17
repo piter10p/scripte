@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { DocumentBodyService } from '../services/document-body/document-body.service';
-import { TextSelection } from '../services/document-body/TextSelection';
+import { TextRange } from '../services/document-body/TextRange';
 import { DocumentPosition } from '../services/document-body/DocumentPosition';
 import { DocumentBody } from '../services/document-body/DocumentBody';
 
@@ -16,7 +16,7 @@ export class TextRendererComponent implements OnInit {
 
   private documentBody: DocumentBody;
   private cursorPosition: DocumentPosition;
-  private textSelection: TextSelection;
+  private textSelection: TextRange;
 
   private isCharInSelection(position: DocumentPosition) {
     if (this.textSelection) {
@@ -38,7 +38,7 @@ export class TextRendererComponent implements OnInit {
       this.cursorPosition = value;
     });
 
-    this.documentBodyService.selectionChanged$.subscribe((value: TextSelection) => {
+    this.documentBodyService.selectionChanged$.subscribe((value: TextRange) => {
       this.textSelection = value;
     });
   }

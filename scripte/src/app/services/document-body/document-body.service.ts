@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { KeyEventConsumerContext } from './KeyEventConsumers/KeyEventConsumerContext';
 import { KeyEventConsumerRegistryService } from './KeyEventConsumers/key-event-consumer-registry.service';
-import { TextSelection } from './TextSelection';
+import { TextRange } from './TextRange';
 import { DocumentPosition } from './DocumentPosition';
 import { DocumentBody } from './DocumentBody';
 
@@ -26,7 +26,7 @@ export class DocumentBodyService {
   private cursorPosition: DocumentPosition = new DocumentPosition(0, 0);
   private cursorPositionChanged = new BehaviorSubject(this.cursorPosition);
 
-  private selection: TextSelection;
+  private selection: TextRange;
   private selectionChanged = new BehaviorSubject(this.selection);
 
   public documentBodyChanged$ = this.documentBodyChanged.asObservable();
