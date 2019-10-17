@@ -1,26 +1,21 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { KeyEventConsumerContext } from './KeyEventConsumers/KeyEventConsumerContext';
-import { WritableKeyEventConsumer } from './KeyEventConsumers/WritableKeyEventConsumer';
-import { BackspaceKeyEventConsumer } from './KeyEventConsumers/BackspaceKeyEventConsumer';
-import { CursorMoveKeyEventConsumer } from './KeyEventConsumers/CursorMoveKeyEventConsumer';
-import { IKeyEventConsumer } from './KeyEventConsumers/IKeyEventConsumer';
+import { KeyEventConsumerRegistryService } from './KeyEventConsumers/key-event-consumer-registry.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DocumentBodyService {
 
-  constructor() {
+  constructor(keyEventConsumerRegistry: KeyEventConsumerRegistryService) {
     window.addEventListener('keydown', (event) =>
       this.onKeydownHandler(event));
+  
+    this.keyEventConsumerRegistry = keyEventConsumerRegistry;
   }
 
-  private keyEventConsumers: IKeyEventConsumer[] = [
-    new WritableKeyEventConsumer(),
-    new BackspaceKeyEventConsumer(),
-    new CursorMoveKeyEventConsumer()
-  ];
+  private keyEventConsumerRegistry: KeyEventConsumerRegistryService;
 
   private documentBody: string[] = ['t', 'e', 's', 't'];
   private documentBodyChanged = new BehaviorSubject(this.documentBody);
@@ -35,7 +30,8 @@ export class DocumentBodyService {
 
     const context = this.createKeyEventConsumerContext(event);
 
-    this.keyEventConsumers.forEach(consumer => {
+    this.keyEventConsumerRegistry.getKeyEventConsumers()
+    .forEach(consumer => {
       consumer.handle(context);
     });
   }
